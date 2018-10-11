@@ -3,9 +3,11 @@ package com.guojiel.library;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.ViewGroup;
 
 public class BlurDialog extends Dialog {
@@ -28,7 +30,11 @@ public class BlurDialog extends Dialog {
     }
 
     private void init(Context context){
-        Activity activity = (Activity) context;
+        Activity activity = getActivityFromContext(context);
+        if(activity == null){
+            Log.e("BlurDialog", "context is not a Activity Context......");
+            return;
+        }
         ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
         mBlurView = decorView.findViewById(R.id.blur_dialog_bg);
         if(mBlurView == null){
@@ -39,22 +45,38 @@ public class BlurDialog extends Dialog {
         }
     }
 
+    private Activity getActivityFromContext(Context context){
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity)context;
+            }
+            context = ((ContextWrapper)context).getBaseContext();
+        }
+        return null;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBlurView.blur();
+        if(mBlurView != null) {
+            mBlurView.blur();
+        }
     }
 
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mBlurView.show();
+        if(mBlurView != null) {
+            mBlurView.show();
+        }
     }
 
     @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mBlurView.hide();
+        if(mBlurView != null) {
+            mBlurView.hide();
+        }
     }
 
 }
